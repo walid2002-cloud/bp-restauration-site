@@ -1,139 +1,97 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { scrollToSection } from '../lib/scroll';
+
+const links = [
+  { id: 'accueil', label: 'Accueil' },
+  { id: 'services', label: 'Nos Services' },
+  { id: 'pourquoi', label: 'Pourquoi Nous' },
+  { id: 'temoignages', label: 'Témoignages' },
+  { id: 'contact', label: 'Contact' },
+];
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-      setIsMobileMenuOpen(false);
-    }
+  const go = (id: string) => {
+    scrollToSection(id);
+    setIsOpen(false);
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex-shrink-0">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-2xl font-bold text-[#0F172A] font-['Poppins']"
-            >
-              BP<span className="text-[#D86C4E]">Restauration</span>
-            </button>
-          </div>
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5">
+      <div
+        className={`mx-auto flex max-w-6xl items-center justify-between rounded-2xl border px-4 py-3 transition-all duration-500 sm:px-5 ${
+          isScrolled
+            ? 'border-white/50 bg-[#fffdf9]/80 shadow-[0_18px_50px_-28px_rgba(16,22,32,0.55)] backdrop-blur-xl'
+            : 'border-transparent bg-[#fffdf9]/55 backdrop-blur-md'
+        }`}
+      >
+        <button onClick={() => go('accueil')} className="flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink font-display text-sm text-amber">
+            BP
+          </span>
+          <span className="font-display text-lg tracking-tight text-ink">
+            Restauration
+          </span>
+        </button>
 
-          <div className="hidden md:flex items-center space-x-8">
+        <nav className="hidden items-center gap-7 lg:flex">
+          {links.map((link) => (
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="text-[#1F2937] hover:text-[#D86C4E] transition-colors font-medium"
+              key={link.id}
+              onClick={() => go(link.id)}
+              className="text-sm font-medium text-ink/80 transition-colors hover:text-copper"
             >
-              Accueil
+              {link.label}
             </button>
-            <button
-              onClick={() => scrollToSection('services')}
-              className="text-[#1F2937] hover:text-[#D86C4E] transition-colors font-medium"
-            >
-              Nos Services
-            </button>
-            <button
-              onClick={() => scrollToSection('pourquoi')}
-              className="text-[#1F2937] hover:text-[#D86C4E] transition-colors font-medium"
-            >
-              Pourquoi Nous
-            </button>
-            <button
-              onClick={() => scrollToSection('temoignages')}
-              className="text-[#1F2937] hover:text-[#D86C4E] transition-colors font-medium"
-            >
-              Témoignages
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="text-[#1F2937] hover:text-[#D86C4E] transition-colors font-medium"
-            >
-              Contact
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="bg-[#F2A65A] text-white px-6 py-3 rounded-lg hover:bg-[#D86C4E] transition-all duration-300 font-semibold shadow-md hover:shadow-lg"
-            >
-              Organiser une réunion
-            </button>
-          </div>
-
+          ))}
           <button
-            className="md:hidden text-[#0F172A]"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => go('contact')}
+            className="rounded-full bg-copper px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5 hover:bg-ink"
           >
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            Organiser une réunion
           </button>
-        </div>
+        </nav>
+
+        <button
+          className="grid h-10 w-10 place-items-center rounded-xl text-ink lg:hidden"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+        >
+          {isOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
 
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="px-4 pt-4 pb-6 space-y-4">
+      {isOpen && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-2xl border border-black/5 bg-[#fffdf9]/95 p-4 shadow-xl backdrop-blur-xl lg:hidden">
+          <div className="flex flex-col gap-1">
+            {links.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => go(link.id)}
+                className="rounded-xl px-3 py-3 text-left text-base font-medium text-ink hover:bg-paper"
+              >
+                {link.label}
+              </button>
+            ))}
             <button
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setIsMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 text-[#1F2937] hover:text-[#D86C4E] font-medium"
-            >
-              Accueil
-            </button>
-            <button
-              onClick={() => scrollToSection('services')}
-              className="block w-full text-left py-2 text-[#1F2937] hover:text-[#D86C4E] font-medium"
-            >
-              Nos Services
-            </button>
-            <button
-              onClick={() => scrollToSection('pourquoi')}
-              className="block w-full text-left py-2 text-[#1F2937] hover:text-[#D86C4E] font-medium"
-            >
-              Pourquoi Nous
-            </button>
-            <button
-              onClick={() => scrollToSection('temoignages')}
-              className="block w-full text-left py-2 text-[#1F2937] hover:text-[#D86C4E] font-medium"
-            >
-              Témoignages
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="block w-full text-left py-2 text-[#1F2937] hover:text-[#D86C4E] font-medium"
-            >
-              Contact
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="block w-full bg-[#F2A65A] text-white px-6 py-3 rounded-lg hover:bg-[#D86C4E] transition-all font-semibold text-center"
+              onClick={() => go('contact')}
+              className="mt-2 rounded-full bg-copper px-4 py-3 text-sm font-semibold text-white"
             >
               Organiser une réunion
             </button>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

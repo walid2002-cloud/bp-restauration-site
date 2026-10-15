@@ -1,87 +1,92 @@
-import { useEffect, useState, useRef } from 'react';
-import { Award, Building2, UtensilsCrossed, Star } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Award, Building2, Star, UtensilsCrossed } from 'lucide-react';
+
+const kpis = [
+  { icon: Award, value: 25, decimals: 0, suffix: '+', label: 'Années d\'expérience' },
+  { icon: Building2, value: 100, decimals: 0, suffix: '+', label: 'Entreprises clientes' },
+  { icon: UtensilsCrossed, value: 5000, decimals: 0, suffix: '+', label: 'Repas servis / jour' },
+  { icon: Star, value: 99.5, decimals: 1, suffix: ' %', label: 'Taux de satisfaction' },
+];
 
 export default function KPIs() {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          setVisible(true);
+          observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.35 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
-  const kpis = [
-    { icon: Award, value: 25, suffix: '+', label: 'Années d\'expérience' },
-    { icon: Building2, value: 100, suffix: '+', label: 'Entreprises clientes' },
-    { icon: UtensilsCrossed, value: 5000, suffix: '+', label: 'Repas servis / jour' },
-    { icon: Star, value: 99.5, suffix: '%', label: 'Taux de satisfaction' }
-  ];
-
   return (
-    <section ref={sectionRef} className="py-20 bg-gradient-to-br from-[#0F172A] to-[#1F2937] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {kpis.map((kpi, index) => (
-            <div
-              key={index}
-              className="text-center p-8 bg-white/5 rounded-2xl backdrop-blur-sm hover:bg-white/10 transition-all duration-300 border border-white/10"
-            >
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D86C4E] to-[#F2A65A] rounded-xl mb-6">
-                <kpi.icon size={36} />
-              </div>
-              <div className="text-5xl font-bold mb-2 font-['Poppins']">
-                {isVisible ? (
-                  <CountUp end={kpi.value} suffix={kpi.suffix} />
-                ) : (
-                  '0' + kpi.suffix
-                )}
-              </div>
-              <div className="text-lg text-white/80">{kpi.label}</div>
-            </div>
-          ))}
-        </div>
+    <section ref={sectionRef} className="relative overflow-hidden bg-ink py-20 text-white sm:py-24">
+      <div className="floor" aria-hidden />
+      <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-copper/30 blur-3xl" />
+
+      <div className="relative mx-auto grid max-w-6xl gap-10 px-5 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="border-white/10 lg:border-l lg:pl-8 lg:first:border-l-0 lg:first:pl-0">
+            <kpi.icon size={22} className="text-amber" />
+            <p className="mt-5 font-display text-5xl tracking-tight sm:text-6xl">
+              {visible ? (
+                <CountUp end={kpi.value} decimals={kpi.decimals} suffix={kpi.suffix} />
+              ) : (
+                `0${kpi.suffix}`
+              )}
+            </p>
+            <p className="mt-2 text-sm text-white/65">{kpi.label}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
 }
 
-function CountUp({ end, suffix }: { end: number; suffix: string }) {
+function CountUp({ end, decimals, suffix }: { end: number; decimals: number; suffix: string }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const duration = 2000;
-    const steps = 60;
-    const increment = end / steps;
-    let current = 0;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      setCount(end);
+      return;
+    }
 
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
+    const duration = 1600;
+    const start = performance.now();
+    let frame = 0;
 
-    return () => clearInterval(timer);
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(end * eased);
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [end]);
+
+  const formatted = new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(count);
 
   return (
     <>
-      {count}
+      {formatted}
       {suffix}
     </>
   );

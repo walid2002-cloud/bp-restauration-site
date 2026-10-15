@@ -1,19 +1,19 @@
 import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppButton() {
-  const whatsappNumber = '+212661952493';
   const message = encodeURIComponent('Bonjour, je souhaite en savoir plus sur vos services de restauration collective.');
 
   return (
     <a
-      href={`https://wa.me/${whatsappNumber}?text=${message}`}
+      href={`https://wa.me/+212661952493?text=${message}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] text-white rounded-full shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+      className="group fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-[0_16px_40px_-12px_rgba(37,211,102,0.9)]"
       aria-label="Contactez-nous sur WhatsApp"
     >
-      <MessageCircle size={28} />
-      <span className="absolute right-full mr-4 bg-[#0F172A] text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      <span className="wa-ring" aria-hidden />
+      <MessageCircle size={26} />
+      <span className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 sm:block">
         Contactez-nous
       </span>
     </a>

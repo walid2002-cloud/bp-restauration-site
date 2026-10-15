@@ -1,105 +1,167 @@
-import { ChefHat, ShieldCheck, Utensils, Clock } from 'lucide-react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { ChefHat, Clock, ShieldCheck, Utensils } from 'lucide-react';
+import { scrollToSection } from '../lib/scroll';
+
+const facts = [
+  { icon: ChefHat, label: 'Service professionnel' },
+  { icon: ShieldCheck, label: 'Hygiène garantie' },
+  { icon: Utensils, label: 'Menus variés' },
+  { icon: Clock, label: 'Livraison ponctuelle' },
+];
 
 export default function Hero() {
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
+  const sectionRef = useRef<HTMLElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let frame = 0;
+    const update = () => {
+      const rect = section.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, -rect.top / rect.height));
+      section.style.setProperty('--p', progress.toFixed(3));
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  const tilt = (event: PointerEvent<HTMLDivElement>) => {
+    const scene = sceneRef.current;
+    if (!scene || window.matchMedia('(pointer: coarse)').matches) return;
+    const rect = scene.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width - 0.5;
+    const py = (event.clientY - rect.top) / rect.height - 0.5;
+    scene.style.setProperty('--ry', `${(px * 14).toFixed(2)}deg`);
+    scene.style.setProperty('--rx', `${(-py * 10).toFixed(2)}deg`);
+    scene.classList.add('is-hot');
+  };
+
+  const reset = () => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    scene.style.setProperty('--ry', '-10deg');
+    scene.style.setProperty('--rx', '7deg');
+    scene.classList.remove('is-hot');
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F9FAFB] via-[#FFF5F0] to-[#FFEEE5]"></div>
+    <section
+      id="accueil"
+      ref={sectionRef}
+      className="relative overflow-hidden pb-16 pt-32 sm:pb-24 sm:pt-36"
+    >
+      <div className="orb orb-a" />
+      <div className="orb orb-b" />
 
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#D86C4E] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#F2A65A] rounded-full blur-3xl"></div>
-      </div>
+      <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 lg:grid-cols-2 lg:gap-10">
+        <div className="hero-copy">
+          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
+            <span className="h-1.5 w-1.5 rounded-full bg-copper" />
+            Mohammedia · 25 ans
+          </p>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0F172A] leading-tight font-['Poppins']">
-                Votre cantine{' '}
-                <span className="text-[#D86C4E]">clé en main</span>, au cœur de
-                votre entreprise
-              </h1>
-              <p className="text-xl text-[#1F2937] leading-relaxed">
-                Depuis 25 ans, nous installons et gérons des espaces de
-                restauration dans les entreprises marocaines. Menus variés,
-                hygiène garantie et service professionnel pour le bien-être de
-                vos équipes.
-              </p>
-            </div>
+          <h1 className="display font-display text-ink">
+            <span className="line-mask">
+              <span className="rise-line" style={{ animationDelay: '0.05s' }}>
+                Votre cantine
+              </span>
+            </span>
+            <span className="line-mask">
+              <span className="rise-line italic text-copper" style={{ animationDelay: '0.16s' }}>
+                clé en main,
+              </span>
+            </span>
+            <span className="line-mask">
+              <span className="rise-line" style={{ animationDelay: '0.28s' }}>
+                au cœur de votre
+                <br />
+                entreprise
+              </span>
+            </span>
+          </h1>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-start space-x-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <ChefHat className="text-[#D86C4E] flex-shrink-0 mt-1" size={24} />
-                <span className="text-[#0F172A] font-medium">
-                  Service professionnel
-                </span>
-              </div>
-              <div className="flex items-start space-x-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <ShieldCheck className="text-[#D86C4E] flex-shrink-0 mt-1" size={24} />
-                <span className="text-[#0F172A] font-medium">
-                  Hygiène garantie
-                </span>
-              </div>
-              <div className="flex items-start space-x-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <Utensils className="text-[#D86C4E] flex-shrink-0 mt-1" size={24} />
-                <span className="text-[#0F172A] font-medium">Menus variés</span>
-              </div>
-              <div className="flex items-start space-x-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <Clock className="text-[#D86C4E] flex-shrink-0 mt-1" size={24} />
-                <span className="text-[#0F172A] font-medium">
-                  Livraison ponctuelle
-                </span>
-              </div>
-            </div>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/75">
+            Depuis 25 ans, nous installons et gérons des espaces de restauration
+            dans les entreprises marocaines. Menus variés, hygiène garantie et
+            service professionnel pour le bien-être de vos équipes.
+          </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="bg-[#F2A65A] text-white px-8 py-4 rounded-lg hover:bg-[#D86C4E] transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105"
-              >
-                Organiser une réunion avec notre équipe
-              </button>
-              <button
-                onClick={() => scrollToSection('services')}
-                className="bg-white text-[#0F172A] px-8 py-4 rounded-lg hover:bg-gray-50 transition-all duration-300 font-semibold text-lg shadow-md border-2 border-[#0F172A] hover:border-[#D86C4E]"
-              >
-                Découvrir nos services
-              </button>
-            </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button
+              onClick={() => scrollToSection('contact')}
+              className="rounded-full bg-copper px-6 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_-18px_rgba(198,83,50,0.9)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-ink"
+            >
+              Organiser une réunion avec notre équipe
+            </button>
+            <button
+              onClick={() => scrollToSection('services')}
+              className="rounded-full border border-ink/15 bg-white/70 px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:border-copper hover:text-copper"
+            >
+              Découvrir nos services
+            </button>
           </div>
 
-          <div className="relative">
-  <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-    {/* Image de fond */}
-    <div
-      className="aspect-[4/5] bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/images/image6.png')",
-      }}
-    >
-      {/* Overlay facultatif pour effet léger */}
-      <div className="absolute inset-0 bg-black/10"></div>
-    </div>
-  </div>
-
-  {/* Effets lumineux décoratifs (tu peux aussi les supprimer si tu veux un look plus sobre) */}
-  <div className="absolute -top-6 -right-6 w-32 h-32 bg-[#F2A65A] rounded-full opacity-20 blur-2xl animate-pulse"></div>
-  <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-[#D86C4E] rounded-full opacity-20 blur-2xl animate-pulse delay-1000"></div>
-</div>
-
-
-
+          <ul className="mt-6 grid grid-cols-2 gap-3 sm:mt-8">
+            {facts.map((fact, index) => (
+              <li
+                key={fact.label}
+                className={`flex items-center gap-2.5 rounded-2xl border border-black/5 bg-white/70 px-3 py-3 text-sm font-medium text-ink ${
+                  index % 2 === 1 ? 'max-sm:mr-14' : ''
+                }`}
+              >
+                <fact.icon size={18} className="shrink-0 text-copper" />
+                {fact.label}
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <div
+          ref={sceneRef}
+          className="hero-scene"
+          onPointerMove={tilt}
+          onPointerLeave={reset}
+        >
+          <div className="hero-scene-inner">
+            <div className="hero-slab" />
+            <div className="hero-frame">
+              <img
+                src="/media/hero.jpg"
+                alt="Plat chaud préparé par BP Restauration"
+                width={1024}
+                height={1536}
+                fetchPriority="high"
+                onLoad={() => setLoaded(true)}
+                className={loaded ? 'is-loaded' : ''}
+              />
+              <div className="hero-glint" />
+            </div>
+            <div className="hero-chip hero-chip-a">
+              <p className="font-display text-2xl leading-none text-ink">99,5 %</p>
+              <p className="mt-1 text-xs text-ink/60">de satisfaction</p>
+            </div>
+            <div className="hero-chip hero-chip-b">
+              <p className="font-display text-2xl leading-none text-ink">ISO 22000</p>
+              <p className="mt-1 text-xs text-ink/60">Hygiène HACCP</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 md:block">
+        <div className="scroll-cue" />
       </div>
     </section>
   );

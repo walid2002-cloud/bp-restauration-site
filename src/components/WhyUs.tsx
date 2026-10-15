@@ -1,61 +1,60 @@
-import { Clock, Award, Users, TrendingUp } from 'lucide-react';
+import { Award, Clock, TrendingUp, Users } from 'lucide-react';
+import { Eyebrow, Reveal, Tilt } from './motion';
+
+const reasons = [
+  {
+    icon: Clock,
+    title: 'Gain de temps précieux',
+    metric: 'Jusqu\'à 45 min économisées par jour',
+    description: 'Vos employés profitent de repas sur place sans déplacements',
+  },
+  {
+    icon: Award,
+    title: 'Qualité et hygiène garanties',
+    metric: 'Certification ISO 22000',
+    description: 'Respect strict des normes HACCP et contrôles réguliers',
+  },
+  {
+    icon: Users,
+    title: 'Équipe expérimentée',
+    metric: '25 ans d\'expérience — +200 entreprises',
+    description: 'Personnel qualifié et formé en continu',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Service flexible et ponctuel',
+    metric: 'Ponctualité 99,5\u00a0%',
+    description: 'Livraisons et service à l\'heure, sans compromis',
+  },
+];
 
 export default function WhyUs() {
-  const reasons = [
-    {
-      icon: Clock,
-      title: 'Gain de temps précieux',
-      metric: 'Jusqu\'à 45 min économisées par jour',
-      description: 'Vos employés profitent de repas sur place sans déplacements'
-    },
-    {
-      icon: Award,
-      title: 'Qualité et hygiène garanties',
-      metric: 'Certification ISO 22000',
-      description: 'Respect strict des normes HACCP et contrôles réguliers'
-    },
-    {
-      icon: Users,
-      title: 'Équipe expérimentée',
-      metric: '25 ans d\'expérience — +200 entreprises',
-      description: 'Personnel qualifié et formé en continu'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Service flexible et ponctuel',
-      metric: 'Ponctualité 99,5 %',
-      description: 'Livraisons et service à l\'heure, sans compromis'
-    }
-  ];
-
   return (
-    <section id="pourquoi" className="py-20 bg-gradient-to-br from-[#F9FAFB] to-[#FFF5F0]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0F172A] mb-6 font-['Poppins']">
+    <section id="pourquoi" className="px-5 py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl">
+        <Reveal>
+          <Eyebrow index="04">Différence</Eyebrow>
+          <h2 className="font-display text-4xl tracking-tight text-ink sm:text-5xl">
             Pourquoi Nous Choisir
           </h2>
-        </div>
+        </Reveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason, index) => (
-            <div
-              key={index}
-              className="group p-8 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#F2A65A] hover:scale-105"
-            >
-              <div className="w-16 h-16 bg-gradient-to-br from-[#D86C4E] to-[#F2A65A] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <reason.icon className="text-white" size={32} />
-              </div>
-              <h3 className="text-xl font-semibold text-[#0F172A] mb-3 font-['Poppins']">
-                {reason.title}
-              </h3>
-              <div className="text-2xl font-bold text-[#D86C4E] mb-3">
-                {reason.metric}
-              </div>
-              <p className="text-[#1F2937] leading-relaxed">
-                {reason.description}
-              </p>
-            </div>
+            <Reveal key={reason.title} delay={index * 80} className="h-full">
+              <Tilt>
+                <article className="flex h-full flex-col rounded-[1.6rem] border border-black/5 bg-[#fffdf9] p-6">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-ink text-amber">
+                    <reason.icon size={20} />
+                  </span>
+                  <h3 className="mt-6 font-display text-2xl leading-tight text-ink">{reason.title}</h3>
+                  <p className="mt-4 text-balance font-display text-[1.55rem] leading-tight text-copper">
+                    {reason.metric}
+                  </p>
+                  <p className="mt-4 text-sm leading-relaxed text-ink/70">{reason.description}</p>
+                </article>
+              </Tilt>
+            </Reveal>
           ))}
         </div>
       </div>
